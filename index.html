@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Solar System Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        body.light-mode {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        #canvas-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #control-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 300px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode #control-panel {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group h3 {
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .planet-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+        }
+
+        .planet-name {
+            font-size: 12px;
+            min-width: 60px;
+        }
+
+        .speed-slider {
+            flex: 1;
+            margin: 0 10px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        body.light-mode .speed-slider {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .speed-value {
+            font-size: 10px;
+            min-width: 30px;
+            text-align: right;
+        }
+
+        .main-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .control-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .control-btn {
+            background: rgba(0, 0, 0, 0.1);
+            color: #333;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        body.light-mode .control-btn:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        #tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        body.light-mode #tooltip {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            z-index: 999;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            #control-panel {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                max-width: none;
+                padding: 15px;
+                max-height: 60vh;
+            }
+
+            .planet-control {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 5px;
+            }
+
+            .planet-name {
+                min-width: auto;
+                text-align: center;
+            }
+
+            .speed-slider {
+                margin: 0;
+            }
+
+            .speed-value {
+                text-align: center;
+                min-width: auto;
+            }
+        }
+
+        /* Scrollbar styling */
+        #control-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #control-panel::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        #control-panel::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        body.light-mode #control-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode #control-panel::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <div class="loading" id="loading">Loading Solar System...</div>
+        
+        <div id="control-panel">
+            <div class="main-controls">
+                <button class="control-btn" id="pause-btn">Pause</button>
+                <button class="control-btn" id="theme-btn">Light Mode</button>
+            </div>
+            
+            <div class="control-group">
+                <h3>Planet Speeds</h3>
+                <div id="planet-controls"></div>
+            </div>
+        </div>
+        
+        <div id="tooltip"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="solarSystem.js"></script>
+</body>
+</html>
