@@ -32,8 +32,7 @@ A fully interactive 3D Solar System simulation built with Three.js and vanilla J
 ```
 galaxyX/
 ├── index.html          # Main HTML file with UI structure
-├── js/
-│   └── solarSystem.js  # Main JavaScript simulation code
+│── solarSystem.js  # Main JavaScript simulation code
 └── README.md           # This file
 ```
 
