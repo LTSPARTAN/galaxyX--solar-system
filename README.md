@@ -146,10 +146,6 @@ this.planetData = {
 - Use Chrome or Firefox for best WebGL performance
 - On mobile, landscape orientation provides better experience
 
-## License
-
-This project is open source and available under the MIT License.
-
 ## Credits
 
 Created with Three.js and modern web technologies. Planet data based on NASA astronomical measurements.
